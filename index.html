@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive Pro | Ultimate UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root {
+            --brand: #2563eb; --brand-light: #eff6ff; --brand-glow: rgba(37, 99, 235, 0.15);
+            --brand-dark: #1d4ed8;
+            --bg: #f8fafc; --card: #ffffff; --text-dark: #0f172a; --text-muted: #64748b;
+            --border: #e2e8f0; --border-focus: #cbd5e1; --success: #10b981; --success-bg: #f0fdf4;
+            --warning: #f59e0b; --warning-bg: #fffbeb;
+            --radius-lg: 20px; --radius-md: 12px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Rubik', sans-serif; background-color: var(--bg); color: var(--text-dark); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 30px 20px; overflow-y: scroll; }
+
+        .dashboard-shell { background: var(--card); width: 100%; max-width: 1000px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); overflow: hidden; position: relative; display: flex; flex-direction: column; min-height: 600px; padding-bottom: 60px; }
+        
+        /* Header */
+        header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #ffffff; z-index: 10; }
+        .brand-logo { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 12px; color: var(--text-dark); }
+        .brand-logo i { color: var(--brand); background: var(--brand-light); padding: 10px; border-radius: var(--radius-md); font-size: 1.5rem; }
+        
+        .identity-wrapper { display: flex; align-items: center; gap: 15px; opacity: 0; transform: translateX(-10px); transition: var(--transition); }
+        .identity-wrapper.active { opacity: 1; transform: translateX(0); }
+        .user-meta { display: flex; align-items: center; gap: 12px; }
+        .user-info { text-align: left; line-height: 1.2; display: none; }
+        @media (min-width: 600px) { .user-info { display: block; } }
+        .user-name { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); }
+        .user-email { font-size: 0.8rem; color: var(--text-muted); }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--brand-light); object-fit: cover; background: var(--border); }
+        .disconnect-btn { color: #ef4444; background: #fef2f2; border: none; cursor: pointer; font-family: inherit; font-weight: 500; font-size: 0.9rem; padding: 8px 14px; border-radius: 8px; transition: var(--transition); }
+        .disconnect-btn:hover { background: #fee2e2; }
+
+        .workspace { padding: 40px; flex: 1; position: relative; display: flex; flex-direction: column; gap: 32px; }
+
+        /* Auth */
+        .auth-shield { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); z-index: 20; display: flex; justify-content: center; align-items: center; transition: var(--transition); }
+        .auth-card { background: #ffffff; border: 1px solid var(--border); padding: 40px; border-radius: var(--radius-lg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; max-width: 420px; width: 90%; }
+        .auth-card i.main-icon { font-size: 4rem; color: var(--brand); margin-bottom: 20px; }
+
+        /* Input Panel */
+        .control-panel { max-width: 750px; margin: 0 auto; width: 100%; text-align: center; transition: var(--transition); }
+        .search-input-group { position: relative; display: flex; align-items: center; margin-bottom: 20px; margin-top: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border-radius: var(--radius-md); }
+        .link-field { width: 100%; padding: 20px 24px 20px 60px; font-size: 1.1rem; border: 2px solid transparent; border-radius: var(--radius-md); outline: none; background: #ffffff; box-shadow: inset 0 0 0 1px var(--border); transition: var(--transition); font-family: inherit; }
+        .link-field:focus { box-shadow: inset 0 0 0 2px var(--brand); background: #ffffff; }
+        .field-icon { position: absolute; left: 24px; color: #94a3b8; font-size: 1.3rem; }
+        
+        .action-trigger { background: var(--brand); color: #ffffff; border: none; padding: 14px 36px; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); width: 100%; max-width: 300px; }
+        .action-trigger:hover:not(:disabled) { background: var(--brand-dark); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3); }
+        .action-trigger:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        /* File Info Card (NEW) */
+        .file-info-card { background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; display: none; margin-top: 20px; text-align: right; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .file-info-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .file-info-icon { font-size: 2.5rem; color: var(--brand); background: var(--brand-light); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 14px; flex-shrink: 0; }
+        .file-info-details h3 { font-size: 1.1rem; color: var(--text-dark); margin-bottom: 6px; word-break: break-all; }
+        .file-info-details p { font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .file-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .meta-box { background: var(--bg); padding: 12px; border-radius: 10px; }
+        .meta-box span { display: block; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .meta-box strong { font-size: 0.95rem; color: var(--text-dark); }
+        
+        .copy-controls { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .copy-controls input { flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; outline: none; transition: var(--transition); }
+        .copy-controls input:focus { border-color: var(--brand); }
+        .btn-copy-single { background: var(--success); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); font-family: inherit; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-copy-single:hover { background: #059669; }
+
+        /* Explorer & Grid */
+        .explorer-card { background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; display: none; }
+        .explorer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 24px;}
+        .explorer-title { font-weight: 600; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .action-buttons-mini button { background: #ffffff; border: 1px solid var(--border); color: var(--text-dark); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 0.9rem; margin-right: 8px; font-weight: 500; transition: var(--transition); }
+        .action-buttons-mini button:hover { background: var(--bg); border-color: var(--border-focus); }
+        
+        .file-matrix { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+        .matrix-item { background: #ffffff; border: 2px solid var(--border); border-radius: 12px; padding: 20px 12px 45px 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: var(--transition); position: relative; user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .matrix-item:hover { border-color: var(--border-focus); transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+        .matrix-item.selected { background: var(--brand-light); border-color: var(--brand); }
+        
+        .check-circle { position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-focus); background: white; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 0.8rem; transition: var(--transition); }
+        .matrix-item.selected .check-circle { background: var(--brand); border-color: var(--brand); color: white; }
+        
+        .matrix-item i.type-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .matrix-item span.title { font-size: 0.85rem; font-weight: 500; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #334155; line-height: 1.4; }
+
+        .item-actions { position: absolute; bottom: 12px; left: 0; right: 0; display: flex; justify-content: center; gap: 10px; opacity: 0; transition: var(--transition); }
+        .matrix-item:hover .item-actions { opacity: 1; }
+        .action-mini { background: white; border: 1px solid var(--border); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .action-mini:hover { background: var(--brand-light); color: var(--brand); border-color: var(--brand); transform: translateY(-2px); }
+        
+        @media (max-width: 768px) { .item-actions { opacity: 1; } }
+
+        /* Sticky Action Bar */
+        .batch-action-bar { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(120px); background: #0f172a; color: white; padding: 16px 28px; border-radius: 50px; display: flex; align-items: center; gap: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 50; opacity: 0; border: 1px solid rgba(255,255,255,0.1); }
+        .batch-action-bar.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .batch-action-bar span { font-weight: 500; font-size: 1.05rem; }
+        .btn-batch { background: var(--brand); color: white; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-family: inherit; font-size: 1rem; }
+        .btn-batch:hover { background: var(--brand-dark); }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); z-index: 100; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: var(--transition); }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; padding: 32px; border-radius: 24px; width: 90%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-overlay.open .modal-content { transform: translateY(0) scale(1); }
+        .modal-content h3 { margin-bottom: 12px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; color: var(--text-dark); }
+        .modal-content p { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; }
+        .modal-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 1.05rem; outline: none; margin-bottom: 24px; background: #f8fafc; transition: var(--transition); }
+        .modal-input:focus { border-color: var(--brand); background: white; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+        .modal-btn { padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; font-size: 1rem; transition: var(--transition); }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
+        .btn-cancel:hover { background: #e2e8f0; }
+        .btn-confirm { background: var(--brand); color: white; }
+        .btn-confirm:hover { background: var(--brand-dark); }
+
+        /* Progress & Success */
+        .progress-box { background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 32px; text-align: center; display: none; margin-top: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .progress-bar-bg { width: 100%; height: 10px; background: #f1f5f9; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid var(--border); }
+        .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--brand), #60a5fa); transition: width 0.4s ease; border-radius: 10px; }
+        
+        .success-banner { background: var(--success-bg); border: 1px solid #bbf7d0; border-radius: var(--radius-md); padding: 32px; text-align: center; display: none; margin-top: 20px; }
+        .success-banner h3 { color: #065f46; font-size: 1.4rem; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .open-folder-btn { background: var(--success); color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; transition: var(--transition); font-size: 1.05rem; }
+        .open-folder-btn:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+
+        .hidden { display: none !important; }
+        .shrouded { opacity: 0; pointer-events: none; }
+        .inline-loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #ffffff; animation: rotate 0.8s linear infinite; }
+        .brand-loader { border-top-color: var(--brand); border-color: rgba(37,99,235,0.1); }
+        @keyframes rotate { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="copyModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3><i class="fas fa-folder-plus text-brand"></i> העתקת קבצים לדרייב</h3>
+            <p>לאיזו תיקייה בתוך "Drive Pro" תרצה להעתיק את הקבצים?</p>
+            <input type="text" id="targetFolderName" class="modal-input" placeholder="לדוגמה: פרויקט חדש...">
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" onclick="closeModal()">ביטול</button>
+                <button class="modal-btn btn-confirm" onclick="startBatchCopy()">התחל העתקה</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="batchActionBar" class="batch-action-bar">
+        <span><strong id="selectedCount" style="color:#60a5fa; font-size:1.2rem;">0</strong> קבצים מסומנים</span>
+        <button class="btn-batch" onclick="openCopyModal()"><i class="fas fa-clone"></i> שכפל לחשבון שלי</button>
+    </div>
+
+    <div class="dashboard-shell">
+        <header>
+            <div class="brand-logo"><i class="fab fa-google-drive"></i><span>Drive Pro</span></div>
+            <div id="identityWrapper" class="identity-wrapper">
+                <div class="user-meta">
+                    <div class="user-info">
+                        <div id="userName" class="user-name">...</div>
+                        <div id="userEmail" class="user-email">...</div>
+                    </div>
+                    <img id="userAvatar" src="" alt="User" class="user-avatar" style="display:none;">
+                    <div id="avatarPlaceholder" class="user-avatar" style="display:flex; align-items:center; justify-content:center; background:var(--brand); color:white; font-weight:bold;">U</div>
+                </div>
+                <button class="disconnect-btn" onclick="logout()" title="התנתק"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <div class="workspace">
+            <div id="authShield" class="auth-shield">
+                <div class="auth-card">
+                    <i class="fab fa-google-drive main-icon"></i>
+                    <h2 style="font-size: 1.6rem; margin-bottom: 10px; color: var(--text-dark);">התחברות למערכת</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;">כדי שנוכל לסרוק ולהעתיק קבצים ישירות לדרייב הפרטי שלך, יש לאשר גישה מאובטחת באמצעות גוגל.</p>
+                    <button id="loginBtn" class="action-trigger" style="width: 100%; max-width: 100%;"><i class="fab fa-google"></i> התחבר לחשבון גוגל</button>
+                    <p id="authFeedback" style="margin-top: 20px; font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"></p>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h1 style="font-size: 1.8rem; margin-bottom: 8px; font-weight: 700; color: var(--text-dark);">מה תרצה להעתיק היום?</h1>
+                <p style="color:var(--text-muted); font-size: 1.05rem;">הדבק כאן קישור לקובץ או לתיקייה מכל חשבון Google Drive</p>
+                
+                <div class="search-input-group">
+                    <i class="fas fa-link field-icon"></i>
+                    <input type="text" id="linkInputField" class="link-field" placeholder="https://drive.google.com/..." autocomplete="off" dir="ltr">
+                </div>
+                
+                <button id="actionBtn" class="action-trigger" disabled><i class="fas fa-wand-magic-sparkles"></i> ממתין לקישור...</button>
+            </div>
+
+            <div id="fileInfoPanel" class="file-info-card">
+                <div class="file-info-header">
+                    <div class="file-info-icon"><i id="fiIcon" class="fas fa-file"></i></div>
+                    <div class="file-info-details">
+                        <h3 id="fiName">טוען נתונים...</h3>
+                        <p><span id="fiTypeLabel" style="background:var(--bg); padding:2px 8px; border-radius:4px; border:1px solid var(--border); font-size:0.8rem;">מזהה סוג...</span></p>
+                    </div>
+                </div>
+                
+                <div class="file-meta-grid">
+                    <div class="meta-box"><span>משקל הקובץ</span><strong id="fiSize" dir="ltr">-</strong></div>
+                    <div class="meta-box"><span>בעלים</span><strong id="fiOwner">-</strong></div>
+                    <div class="meta-box"><span>סטטוס הרשאה</span><strong style="color:var(--success)"><i class="fas fa-check-circle"></i> גישה תקינה</strong></div>
+                </div>
+
+                <div class="copy-controls">
+                    <input type="text" id="singleTargetFolder" placeholder="שם תיקיית יעד (אופציונלי)...">
+                    <button id="btnCopySingle" class="btn-copy-single" onclick="executeSingleCopy()"><i class="fas fa-download"></i> שמור בדרייב שלי</button>
+                </div>
+            </div>
+
+            <div id="progressBox" class="progress-box">
+                <h3 style="margin-bottom: 15px; color: var(--brand); font-size: 1.3rem;"><i class="fas fa-sync fa-spin"></i> מעתיק קבצים לחשבונך...</h3>
+                <p style="color: var(--text-muted); font-size: 1rem;">קובץ <span id="progCurrent" style="font-weight:700;color:var(--text-dark);">0</span> מתוך <span id="progTotal" style="font-weight:700;color:var(--text-dark);">0</span></p>
+                <div class="progress-bar-bg"><div id="progressFill" class="progress-fill"></div></div>
+                <p id="progFilename" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"></p>
+            </div>
+
+            <div id="successBanner" class="success-banner">
+                <h3><i class="fas fa-check-circle"></i> הפעולה הושלמה בהצלחה!</h3>
+                <p style="color: #047857; margin-bottom: 10px; font-size: 1.1rem;" id="successMsg">התוכן שוכפל ונשמר בחשבון הדרייב שלך.</p>
+                <a id="openFolderBtn" href="#" target="_blank" class="open-folder-btn"><i class="fas fa-external-link-alt"></i> צפה בתיקייה בדרייב</a>
+            </div>
+
+            <div id="explorerPanel" class="explorer-card">
+                <div class="explorer-header">
+                    <div class="explorer-title"><i class="fas fa-folder-open" style="color: var(--warning);"></i> <span id="scannedFolderName">תוכן התיקייה</span></div>
+                    <div class="action-buttons-mini">
+                        <button onclick="selectAll()"><i class="fas fa-check-double text-brand"></i> בחר הכל</button>
+                        <button onclick="clearSelection()"><i class="fas fa-times text-muted"></i> בטל בחירה</button>
+                    </div>
+                </div>
+                <div id="fileMatrix" class="file-matrix"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const API_BASE = 'https://smti.uk/drive-pro/api';
+        
+        let appState = {
+            tokens: null, activeType: null, activeId: null, activeUrl: null,
+            scannedFiles: [], selectedFileIds: new Set(), currentFolderName: ''
+        };
+
+        const ELS = {
+            authShield: document.getElementById('authShield'), identityWrapper: document.getElementById('identityWrapper'),
+            loginBtn: document.getElementById('loginBtn'), authFeedback: document.getElementById('authFeedback'),
+            userName: document.getElementById('userName'), userEmail: document.getElementById('userEmail'), 
+            userAvatar: document.getElementById('userAvatar'), avatarPlaceholder: document.getElementById('avatarPlaceholder'),
+            inputField: document.getElementById('linkInputField'), actionBtn: document.getElementById('actionBtn'),
+            
+            fileInfoPanel: document.getElementById('fileInfoPanel'), fiIcon: document.getElementById('fiIcon'), fiName: document.getElementById('fiName'), fiTypeLabel: document.getElementById('fiTypeLabel'), fiSize: document.getElementById('fiSize'), fiOwner: document.getElementById('fiOwner'), btnCopySingle: document.getElementById('btnCopySingle'), singleTargetFolder: document.getElementById('singleTargetFolder'),
+            
+            explorerPanel: document.getElementById('explorerPanel'), fileMatrix: document.getElementById('fileMatrix'), scannedFolderName: document.getElementById('scannedFolderName'),
+            batchActionBar: document.getElementById('batchActionBar'), selectedCount: document.getElementById('selectedCount'),
+            copyModal: document.getElementById('copyModal'), targetFolderName: document.getElementById('targetFolderName'),
+            
+            progressBox: document.getElementById('progressBox'), progCurrent: document.getElementById('progCurrent'), progTotal: document.getElementById('progTotal'), progressFill: document.getElementById('progressFill'), progFilename: document.getElementById('progFilename'),
+            successBanner: document.getElementById('successBanner'), openFolderBtn: document.getElementById('openFolderBtn'), successMsg: document.getElementById('successMsg')
+        };
+
+        // --- אתחול ואימות ---
+        window.addEventListener('load', async () => {
+            const cachedSession = localStorage.getItem('gdrive_tokens');
+            if (cachedSession) {
+                appState.tokens = JSON.parse(cachedSession);
+                ELS.authFeedback.innerHTML = '<div class="brand-loader inline-loader" style="display:inline-block; vertical-align:middle; width:16px; height:16px;"></div> מתחבר...';
+                ELS.loginBtn.disabled = true;
+                try { await fetchUserProfile(); revealDashboard(); } catch (err) { logout(); }
+            }
+        });
+
+        ELS.loginBtn.addEventListener('click', () => {
+            window.open(`${API_BASE}/login`, 'GoogleOAuth', `width=500,height=600,top=100,left=100`);
+        });
+
+        window.addEventListener('message', async (e) => {
+            if (e.data && e.data.type === 'AUTH_SUCCESS') {
+                appState.tokens = e.data.tokens; localStorage.setItem('gdrive_tokens', JSON.stringify(appState.tokens));
+                await fetchUserProfile(); revealDashboard();
+            }
+        });
+
+        // שימוש ב-API החדש שיצרנו למשיכת פרופיל משתמש מלא
+        async function fetchUserProfile() {
+            const res = await secureFetch(`${API_BASE}/me`);
+            if (!res.ok) throw new Error('Auth failed');
+            const user = await res.json();
+            
+            ELS.userName.textContent = user.name || 'משתמש מחובר';
+            ELS.userEmail.textContent = user.email;
+            
+            if (user.picture) {
+                ELS.userAvatar.src = user.picture;
+                ELS.userAvatar.style.display = 'block';
+                ELS.avatarPlaceholder.style.display = 'none';
+            } else {
+                ELS.avatarPlaceholder.textContent = (user.given_name || user.name || 'U')[0].toUpperCase();
+            }
+        }
+
+        // --- פונקציות עזר ---
+        function parseGoogleError(errorMsg) {
+            if(!errorMsg) return 'שגיאה לא ידועה';
+            const lowerMsg = errorMsg.toLowerCase();
+            if (lowerMsg.includes('not found') || lowerMsg.includes('404')) return 'הקובץ לא נמצא. או שהוא נמחק, או שהקישור שגוי.';
+            if (lowerMsg.includes('permission') || lowerMsg.includes('access') || lowerMsg.includes('403')) return 'אין לך הרשאה לגשת לקובץ. ייתכן שהוא פרטי.';
+            return errorMsg;
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes || bytes === 0) return 'לא ידוע';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getIconForMime(mimeType) {
+            if (!mimeType) return 'fa-file text-brand';
+            if (mimeType.includes('folder')) return 'fa-folder text-warning';
+            if (mimeType.includes('image')) return 'fa-image text-blue-500';
+            if (mimeType.includes('video')) return 'fa-video text-red-500';
+            if (mimeType.includes('pdf')) return 'fa-file-pdf text-red-400';
+            if (mimeType.includes('spreadsheet')) return 'fa-file-excel text-green-500';
+            if (mimeType.includes('document')) return 'fa-file-word text-blue-600';
+            return 'fa-file-alt text-brand';
+        }
+
+        // --- זיהוי קישורים ---
+        ELS.inputField.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            resetWorkspaces();
+            
+            if (!val) { updateButtonState(false, '<i class="fas fa-wand-magic-sparkles"></i> ממתין לקישור...'); return; }
+            
+            appState.activeUrl = val;
+            const folderMatch = val.match(/\/folders\/([a-zA-Z0-9_-]{15,})/);
+            
+            if (folderMatch) {
+                appState.activeType = 'folder'; appState.activeId = folderMatch[1];
+                updateButtonState(true, '<i class="fas fa-search"></i> סרוק תיקייה לדרייב', 'var(--text-dark)');
+            } else {
+                // מניחים שזה קובץ אם יש קישור כלשהו (ה-API בצד שרת יחלץ את ה-ID)
+                appState.activeType = 'file';
+                updateButtonState(true, '<i class="fas fa-info-circle"></i> קרא נתוני קובץ', 'var(--brand)');
+            }
+        });
+
+        function updateButtonState(enabled, html, bg = '') {
+            ELS.actionBtn.disabled = !enabled; ELS.actionBtn.innerHTML = html;
+            if (bg) ELS.actionBtn.style.background = bg;
+        }
+
+        // --- כפתור ראשי מפעיל ---
+        ELS.actionBtn.addEventListener('click', async () => {
+            if (appState.activeType === 'folder') {
+                await performFolderScan();
+            } else if (appState.activeType === 'file') {
+                await loadFileInfo();
+            }
+        });
+
+        // --- הזרקת נתוני קובץ (הפיצ'ר החדש) ---
+        async function loadFileInfo() {
+            setLoadingState(true, 'קורא נתונים...');
+            try {
+                const res = await secureFetch(`${API_BASE}/file-info`, { 
+                    method: 'POST', body: JSON.stringify({ linkOrId: appState.activeUrl }) 
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(parseGoogleError(data.error));
+
+                // זיהה תיקייה בטעות כקובץ? נעביר למצב סריקה
+                if (data.mimeType.includes('folder')) {
+                    appState.activeType = 'folder';
+                    appState.activeId = data.id;
+                    dispatchToast('זוהתה תיקייה! סורק תוכן...', 'success');
+                    return await performFolderScan();
+                }
+
+                // עידכון הממשק
+                ELS.fiName.textContent = data.name;
+                ELS.fiTypeLabel.textContent = data.mimeType.split('.').pop() || data.mimeType;
+                ELS.fiSize.textContent = formatBytes(data.size);
+                ELS.fiOwner.textContent = data.owners && data.owners.length > 0 ? data.owners[0].displayName : 'מקור חיצוני';
+                ELS.fiIcon.className = `fas ${getIconForMime(data.mimeType)}`;
+                
+                appState.scannedFiles = [data]; // שומר לשימוש בהעתקה
+
+                ELS.fileInfoPanel.style.display = 'block';
+                updateButtonState(false, '<i class="fas fa-check"></i> נתונים נטענו');
+                ELS.actionBtn.style.display = 'none'; // נסתיר כי יש כפתור חדש בפאנל
+            } catch (err) {
+                dispatchToast(err.message, 'error');
+                updateButtonState(true, '<i class="fas fa-info-circle"></i> נסה שוב', 'var(--brand)');
+            } finally { setLoadingState(false); }
+        }
+
+        // העתקת קובץ בודד
+        async function executeSingleCopy() {
+            const targetFolder = ELS.singleTargetFolder.value.trim();
+            const fileData = appState.scannedFiles[0];
+            
+            ELS.btnCopySingle.disabled = true;
+            ELS.btnCopySingle.innerHTML = '<i class="fas fa-spinner fa-spin"></i> מעתיק...';
+            
+            try {
+                const res = await secureFetch(`${API_BASE}/copy-file`, {
+                    method: 'POST', body: JSON.stringify({ fileId: fileData.id, targetFolderName: targetFolder })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(parseGoogleError(data.error));
+                
+                ELS.fileInfoPanel.style.display = 'none';
+                ELS.successMsg.textContent = `הקובץ "${fileData.name}" הועתק בהצלחה.`;
+                ELS.openFolderBtn.href = data.newLink || data.folderLink || 'https://drive.google.com';
+                ELS.successBanner.style.display = 'block';
+                dispatchToast('הקובץ הועתק!', 'success');
+            } catch(err) {
+                dispatchToast(`שגיאה: ${err.message}`, 'error');
+            } finally {
+                ELS.btnCopySingle.disabled = false;
+                ELS.btnCopySingle.innerHTML = '<i class="fas fa-download"></i> שמור בדרייב שלי';
+            }
+        }
+
+        // --- סריקת תיקיות והצגה ב-Grid ---
+        async function performFolderScan() {
+            setLoadingState(true, 'סורק תיקייה...');
+            try {
+                const res = await secureFetch(`${API_BASE}/list-folder`, { 
+                    method: 'POST', body: JSON.stringify({ folderId: appState.activeUrl }) // שולחים את הקישור המלא
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(parseGoogleError(data.error));
+
+                appState.scannedFiles = data.files || [];
+                appState.currentFolderName = data.folderName || 'תיקייה סרוקה';
+                ELS.scannedFolderName.textContent = appState.currentFolderName;
+                
+                renderGrid();
+                ELS.actionBtn.style.display = 'none';
+                ELS.explorerPanel.style.display = 'block';
+                dispatchToast('התיקייה נסרקה בהצלחה', 'success');
+            } catch (err) {
+                dispatchToast(err.message, 'error');
+                updateButtonState(true, '<i class="fas fa-search"></i> נסה שוב', 'var(--text-dark)');
+            } finally { setLoadingState(false); }
+        }
+
+        function renderGrid() {
+            ELS.fileMatrix.innerHTML = '';
+            appState.selectedFileIds.clear();
+            updateActionBar();
+
+            if (appState.scannedFiles.length === 0) {
+                ELS.fileMatrix.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-folder-open text-4xl mb-4 opacity-50"></i><br>התיקייה ריקה או שאין הרשאה אליה</div>'; return;
+            }
+
+            appState.scannedFiles.forEach(file => {
+                const isFolder = file.mimeType.includes('folder');
+                const div = document.createElement('div');
+                div.className = 'matrix-item';
+                div.dataset.id = file.id;
+                
+                div.innerHTML = `
+                    <div class="check-circle"><i class="fas fa-check"></i></div>
+                    <i class="fas ${getIconForMime(file.mimeType)} type-icon"></i>
+                    <span class="title" title="${file.name}">${file.name}</span>
+                    <div class="item-actions">
+                        <button class="action-mini" title="פתח קובץ מקורי בדפדפן" onclick="openFileInBrowser('${file.webViewLink}', event)"><i class="fas fa-external-link-alt"></i></button>
+                    </div>
+                `;
+                
+                div.onclick = (e) => {
+                    if (isFolder) return window.open(file.webViewLink, '_blank'); 
+                    
+                    if (appState.selectedFileIds.has(file.id)) {
+                        appState.selectedFileIds.delete(file.id);
+                        div.classList.remove('selected');
+                    } else {
+                        appState.selectedFileIds.add(file.id);
+                        div.classList.add('selected');
+                    }
+                    updateActionBar();
+                };
+                ELS.fileMatrix.appendChild(div);
+            });
+        }
+
+        window.openFileInBrowser = (url, event) => {
+            event.stopPropagation(); window.open(url, '_blank');
+        };
+
+        function selectAll() {
+            appState.selectedFileIds.clear();
+            document.querySelectorAll('.matrix-item').forEach(el => {
+                if (!el.innerHTML.includes('fa-folder')) {
+                    appState.selectedFileIds.add(el.dataset.id);
+                    el.classList.add('selected');
+                }
+            });
+            updateActionBar();
+        }
+        
+        function clearSelection() {
+            appState.selectedFileIds.clear();
+            document.querySelectorAll('.matrix-item.selected').forEach(el => el.classList.remove('selected'));
+            updateActionBar();
+        }
+
+        function updateActionBar() {
+            ELS.selectedCount.textContent = appState.selectedFileIds.size;
+            if (appState.selectedFileIds.size > 0) ELS.batchActionBar.classList.add('visible');
+            else ELS.batchActionBar.classList.remove('visible');
+        }
+
+        // --- תהליך העתקת Batch מרובה ---
+        function openCopyModal() {
+            ELS.targetFolderName.value = appState.currentFolderName || 'עותקים חדשים';
+            ELS.copyModal.classList.add('open');
+        }
+        function closeModal() { ELS.copyModal.classList.remove('open'); }
+
+        async function startBatchCopy() {
+            const targetName = ELS.targetFolderName.value.trim();
+            closeModal();
+            ELS.explorerPanel.style.display = 'none';
+            ELS.batchActionBar.classList.remove('visible');
+            
+            ELS.progressBox.style.display = 'block';
+            ELS.successBanner.style.display = 'none';
+            
+            const total = appState.selectedFileIds.size;
+            const idsArray = Array.from(appState.selectedFileIds);
+            let successCount = 0;
+            let lastFolderLink = '';
+
+            ELS.progTotal.textContent = total;
+
+            for (let i = 0; i < total; i++) {
+                const fileId = idsArray[i];
+                const fileObj = appState.scannedFiles.find(f => f.id === fileId);
+                
+                ELS.progCurrent.textContent = (i + 1);
+                ELS.progFilename.textContent = `מעתיק את: ${fileObj ? fileObj.name : 'קובץ...'}`;
+                ELS.progressFill.style.width = `${((i) / total) * 100}%`;
+
+                try {
+                    const res = await secureFetch(`${API_BASE}/copy-file`, {
+                        method: 'POST', body: JSON.stringify({ fileId: fileId, targetFolderName: targetName })
+                    });
+                    const data = await res.json();
+                    
+                    if (!res.ok) {
+                        dispatchToast(`שגיאה בקובץ ${i+1}: ${parseGoogleError(data.error)}`, 'error');
+                    } else if (data.isFolderShortcut) {
+                        dispatchToast('נמצא קיצור דרך לתיקייה, מדלג...', 'warning');
+                    } else {
+                        successCount++;
+                        if (data.folderLink) lastFolderLink = data.folderLink;
+                    }
+                } catch (e) {
+                    dispatchToast(`שגיאת רשת בעת העתקה. מדלג...`, 'error');
+                }
+            }
+
+            ELS.progressFill.style.width = `100%`;
+            setTimeout(() => {
+                ELS.progressBox.style.display = 'none';
+                ELS.successMsg.textContent = `${successCount} מתוך ${total} קבצים הועתקו בהצלחה.`;
+                ELS.openFolderBtn.href = lastFolderLink || 'https://drive.google.com';
+                ELS.successBanner.style.display = 'block';
+                dispatchToast('תהליך ההעתקה הסתיים!', 'success');
+                ELS.inputField.value = '';
+            }, 600);
+        }
+
+        // --- עזרי רשת ---
+        async function secureFetch(url, options = {}) {
+            if (!options.headers) options.headers = { 'Content-Type': 'application/json' };
+            options.headers['Authorization'] = `Bearer ${appState.tokens.access_token}`;
+            let res = await fetch(url, options);
+            if (res.status === 401) {
+                if (await refreshToken()) {
+                    options.headers['Authorization'] = `Bearer ${appState.tokens.access_token}`;
+                    res = await fetch(url, options);
+                } else { logout(); throw new Error('Session expired'); }
+            }
+            return res;
+        }
+
+        async function refreshToken() {
+            if (!appState.tokens.refresh_token) return false;
+            try {
+                const res = await fetch(`${API_BASE}/refresh`, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ refreshToken: appState.tokens.refresh_token }) });
+                if (!res.ok) return false;
+                const data = await res.json();
+                appState.tokens.access_token = data.access_token;
+                if (data.refresh_token) appState.tokens.refresh_token = data.refresh_token;
+                localStorage.setItem('gdrive_tokens', JSON.stringify(appState.tokens));
+                return true;
+            } catch (e) { return false; }
+        }
+
+        function resetWorkspaces() {
+            ELS.explorerPanel.style.display = 'none'; 
+            ELS.successBanner.style.display = 'none'; 
+            ELS.progressBox.style.display = 'none';
+            ELS.fileInfoPanel.style.display = 'none';
+            ELS.actionBtn.style.display = 'inline-flex';
+            appState.selectedFileIds.clear(); 
+            updateActionBar();
+        }
+
+        function setLoadingState(isLoading, text = '') {
+            if (isLoading) { 
+                ELS.actionBtn.disabled = true; 
+                ELS.actionBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> ${text}`; 
+            }
+        }
+
+        function revealDashboard() { 
+            ELS.authShield.classList.add('shrouded'); 
+            setTimeout(() => ELS.authShield.classList.add('hidden'), 300); 
+            ELS.identityWrapper.classList.add('active'); 
+        }
+        
+        window.logout = () => { localStorage.removeItem('gdrive_tokens'); location.reload(); };
+        
+        function dispatchToast(msg, type) { 
+            let color = type === 'error' ? "#ef4444" : (type === 'warning' ? "#f59e0b" : "#10b981");
+            Toastify({ text: msg, duration: 4000, gravity: "top", position: "center", style: { background: color, borderRadius: "10px", fontWeight: "500", fontFamily: "Rubik", padding: "12px 20px" } }).showToast(); 
+        }
+    </script>
+</body>
+</html>
