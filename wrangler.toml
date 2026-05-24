@@ -1,0 +1,8 @@
+name = "drive-pro-ui"
+main = "worker.js"
+compatibility_date = "2024-05-24"
+
+# ההגדרה הזו מאפשרת ל-Worker לקרוא קבצי HTML ישירות
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
