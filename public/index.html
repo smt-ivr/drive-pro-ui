@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Drive Pro</title>
+  <meta name="description" content="העתקת קבצים ותיקיות משותפים מ-Google Drive ישירות לדרייב שלך – כולל תיקיות שלמות ומבנה מלא.">
+  <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232f6bff'/%3E%3Cpath d='M9 22l5-9h4l5 9z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="js/theme-init.js"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">דלג לתוכן הראשי</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./" aria-label="Drive Pro – דף הבית">
+        <span class="brand-mark"><i class="fa-brands fa-google-drive" aria-hidden="true"></i></span>
+        <span class="brand-name">Drive Pro</span>
+      </a>
+
+      <div class="topbar-actions">
+        <button id="historyBtn" class="icon-btn" type="button" title="היסטוריית העתקות" aria-label="היסטוריית העתקות" hidden>
+          <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+        </button>
+        <button id="themeBtn" class="icon-btn" type="button" title="מצב תצוגה" aria-label="החלפת מצב תצוגה">
+          <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+        </button>
+
+        <div id="userMenu" class="user-menu" hidden>
+          <button id="userBtn" class="user-chip" type="button" aria-haspopup="menu" aria-expanded="false">
+            <img id="userAvatar" class="avatar" alt="" referrerpolicy="no-referrer" hidden>
+            <span id="userInitial" class="avatar avatar-fallback" aria-hidden="true">?</span>
+            <span class="user-text">
+              <span id="userName" class="user-name"></span>
+              <span id="userEmail" class="user-email" dir="ltr"></span>
+            </span>
+            <i class="fa-solid fa-chevron-down chevron" aria-hidden="true"></i>
+          </button>
+          <div id="userDropdown" class="dropdown" role="menu" hidden>
+            <a class="dropdown-item" role="menuitem" href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener">
+              <i class="fa-brands fa-google-drive" aria-hidden="true"></i> הדרייב שלי
+            </a>
+            <button id="logoutBtn" class="dropdown-item danger" role="menuitem" type="button">
+              <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> התנתקות
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <!-- Signed out -->
+    <section id="loginView" class="login-view" hidden>
+      <div class="login-card card">
+        <span class="login-mark"><i class="fa-brands fa-google-drive" aria-hidden="true"></i></span>
+        <h1>העתקה חכמה לגוגל דרייב</h1>
+        <p class="lead">מעתיקים קבצים ותיקיות שלמות שמישהו שיתף איתכם – ישירות לדרייב שלכם, בלחיצה אחת.</p>
+        <ul class="feature-list">
+          <li><i class="fa-solid fa-folder-tree" aria-hidden="true"></i> העתקת תיקיות שלמות כולל תתי-תיקיות</li>
+          <li><i class="fa-solid fa-bolt" aria-hidden="true"></i> העתקה מקבילית מהירה עם מעקב התקדמות</li>
+          <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> הקבצים לא עוברים דרכנו – הכול קורה בתוך גוגל</li>
+        </ul>
+        <button id="loginBtn" class="btn btn-google btn-lg" type="button">
+          <i class="fa-brands fa-google" aria-hidden="true"></i>
+          <span>התחברות עם Google</span>
+        </button>
+        <p id="loginNote" class="login-note" role="status"></p>
+      </div>
+    </section>
+
+    <!-- Signed in -->
+    <section id="appView" class="app-view" hidden>
+      <section class="card source-card" aria-labelledby="sourceTitle">
+        <h1 id="sourceTitle" class="source-title">מה נעתיק היום?</h1>
+        <p class="muted">הדביקו קישור לקובץ או לתיקייה ב-Google Drive. אפשר גם כמה קישורים – אחד בכל שורה.</p>
+        <form id="linkForm" class="link-form" novalidate>
+          <div class="link-field">
+            <i class="fa-solid fa-link link-field-icon" aria-hidden="true"></i>
+            <textarea id="linkInput" rows="1" dir="ltr" spellcheck="false" autocomplete="off"
+              placeholder="https://drive.google.com/drive/folders/…" aria-label="קישור ל-Google Drive"></textarea>
+            <button id="clearLinkBtn" class="icon-btn icon-btn-sm" type="button" aria-label="נקה" hidden>
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+          <button id="resolveBtn" class="btn btn-primary btn-lg" type="submit">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <span>המשך</span>
+          </button>
+        </form>
+        <p id="linkHint" class="link-hint" aria-live="polite"></p>
+      </section>
+
+      <section id="browser" class="card browser" aria-label="סייר קבצים" hidden>
+        <div class="browser-toolbar">
+          <nav id="breadcrumbs" class="breadcrumbs" aria-label="מיקום נוכחי"></nav>
+          <div class="toolbar-controls">
+            <label class="search-field">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <input id="filterInput" type="search" placeholder="סינון לפי שם…" aria-label="סינון לפי שם">
+            </label>
+            <select id="sortSelect" class="select" aria-label="מיון">
+              <option value="name:asc">שם (א–ת)</option>
+              <option value="name:desc">שם (ת–א)</option>
+              <option value="modified:desc">עודכן לאחרונה</option>
+              <option value="size:desc">גודל (גדול לקטן)</option>
+              <option value="type:asc">סוג</option>
+            </select>
+            <div class="segmented" role="group" aria-label="תצוגה">
+              <button type="button" data-view="list" title="רשימה" aria-label="תצוגת רשימה"><i class="fa-solid fa-list" aria-hidden="true"></i></button>
+              <button type="button" data-view="grid" title="רשת" aria-label="תצוגת רשת"><i class="fa-solid fa-grip" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="browser-subbar">
+          <label class="checkbox">
+            <input id="selectAllBox" type="checkbox">
+            <span>בחר הכל</span>
+          </label>
+          <span id="folderStats" class="muted"></span>
+          <a id="openSourceLink" class="link-muted" target="_blank" rel="noopener" hidden>
+            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> פתח בדרייב
+          </a>
+        </div>
+        <div id="items" class="items view-list" role="list"></div>
+      </section>
+
+      <section id="jobPanel" class="card job-panel" aria-live="polite" hidden></section>
+    </section>
+  </main>
+
+  <footer class="footer container">
+    <span>Drive Pro</span>
+    <span class="muted">קיצורים: <kbd>Ctrl</kbd>+<kbd>K</kbd> קישור חדש · <kbd>Ctrl</kbd>+<kbd>A</kbd> בחר הכל · <kbd>Backspace</kbd> תיקייה למעלה · <kbd>Esc</kbd> ביטול בחירה</span>
+  </footer>
+
+  <!-- Floating selection bar -->
+  <div id="selectionBar" class="selection-bar" role="region" aria-label="פריטים נבחרים" hidden>
+    <div class="selection-info">
+      <strong id="selCount">0</strong>
+      <span id="selMeta" class="selection-meta"></span>
+    </div>
+    <div class="selection-actions">
+      <button id="clearSelBtn" class="btn btn-quiet" type="button">ניקוי</button>
+      <button id="copySelBtn" class="btn btn-primary" type="button">
+        <i class="fa-solid fa-copy" aria-hidden="true"></i> העתק לדרייב שלי
+      </button>
+    </div>
+  </div>
+
+  <!-- Copy destination dialog -->
+  <dialog id="copyDialog" class="dialog" aria-labelledby="copyDialogTitle">
+    <form id="copyForm" method="dialog" class="dialog-body">
+      <h2 id="copyDialogTitle"><i class="fa-solid fa-folder-plus" aria-hidden="true"></i> לאן להעתיק?</h2>
+      <p id="copySummary" class="muted"></p>
+
+      <label class="field-label" for="destInput">תיקיית יעד בדרייב שלך</label>
+      <div class="dest-field">
+        <span class="dest-prefix" dir="ltr">Drive Pro /</span>
+        <input id="destInput" type="text" autocomplete="off" placeholder="(ישירות בתיקייה הראשית)">
+      </div>
+      <p class="field-help">אפשר ליצור תתי-תיקיות עם "/", למשל: <code>לימודים/סמסטר א</code>. תיקייה קיימת תשמש כיעד.</p>
+
+      <label class="toggle">
+        <input id="keepStructureBox" type="checkbox" checked>
+        <span class="toggle-track" aria-hidden="true"></span>
+        <span>שמירת מבנה התיקיות המקורי</span>
+      </label>
+
+      <div class="dialog-actions">
+        <button class="btn btn-quiet" type="button" value="cancel" id="copyCancelBtn">ביטול</button>
+        <button class="btn btn-primary" type="submit" value="confirm">
+          <i class="fa-solid fa-play" aria-hidden="true"></i> התחל העתקה
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- History drawer -->
+  <dialog id="historyDialog" class="dialog drawer" aria-labelledby="historyTitle">
+    <div class="drawer-header">
+      <h2 id="historyTitle"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> העתקות אחרונות</h2>
+      <button id="historyCloseBtn" class="icon-btn" type="button" aria-label="סגור"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+    <div class="drawer-footer">
+      <button id="historyClearBtn" class="btn btn-quiet btn-sm" type="button"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> ניקוי היסטוריה</button>
+    </div>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+</body>
+</html>

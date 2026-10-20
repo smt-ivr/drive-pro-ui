@@ -1,0 +1,19 @@
+{
+  "name": "drive-pro-ui",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Drive Pro web app – copy shared Google Drive files and folders into your own Drive.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8788",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/*.test.js",
+    "check": "wrangler deploy --dry-run --outdir .wrangler/dry-run && npm test"
+  },
+  "devDependencies": {
+    "wrangler": "^4.40.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
