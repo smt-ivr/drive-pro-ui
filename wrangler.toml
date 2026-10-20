@@ -1,8 +1,14 @@
 name = "drive-pro-ui"
-main = "worker.js"
-compatibility_date = "2024-05-24"
+main = "src/worker.js"
+compatibility_date = "2025-06-01"
 
-# ההגדרה הזו מאפשרת ל-Worker לקרוא קבצי HTML ישירות
-[[rules]]
-type = "Text"
-globs = ["**/*.html"]
+# Served at https://smti.uk/drive-pro/* (route is configured in the Cloudflare dashboard).
+# The API worker ("drive-pro") owns the more specific /drive-pro/api/* route.
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[observability]
+enabled = true
